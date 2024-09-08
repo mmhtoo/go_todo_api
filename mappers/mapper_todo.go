@@ -14,3 +14,11 @@ func MapFromDBTodoToEntityTodo(dbTodo *database.Todo) entities.Todo {
 		UpdatedAt: dbTodo.UpdatedAt,
 	}
 }
+
+func MapFromDBTodoListToEntityTodoList(dbTodos *[]database.Todo) []entities.Todo {
+	todos := []entities.Todo{}
+	for _, todo := range *dbTodos {
+		todos = append(todos, MapFromDBTodoToEntityTodo(&todo))
+	}
+	return todos
+}

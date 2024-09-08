@@ -46,7 +46,11 @@ func main() {
 	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		helpers.NewDataResponse(w, 200, "Success", struct{}{})
 	})
+	router.Get("/todos", todo.HandleGetTodoList(&apiConfig))
+	router.Get("/todos/{todoId}", todo.HandleGetTodoById(&apiConfig))
 	router.Post("/todos", todo.HandleCreateTodo(&apiConfig))
+	router.Delete("/todos/{todoId}", todo.HandleDeleteTodo(&apiConfig))
+	router.Put("/todos/{todoId}", todo.HandleUpdateTodoById(&apiConfig))
 
 	server := &http.Server{
 		Handler: router,
