@@ -1,1 +1,4 @@
 go-todo-api
+.env*
+.env.*
+!.env.example
