@@ -7,6 +7,7 @@ package database
 
 import (
 	"context"
+	"time"
 )
 
 const deleteById = `-- name: DeleteById :exec
@@ -71,18 +72,25 @@ func (q *Queries) FindById(ctx context.Context, id int32) (Todo, error) {
 }
 
 const save = `-- name: Save :one
-INSERT INTO todos (title, status)
-VALUES ($1, $2)
+INSERT INTO todos (title, status, created_at, updated_at)
+VALUES ($1, $2, $3, $4)
 RETURNING id, title, status, created_at, updated_at
 `
 
 type SaveParams struct {
-	Title  string
-	Status string
+	Title     string
+	Status    string
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 func (q *Queries) Save(ctx context.Context, arg SaveParams) (Todo, error) {
-	row := q.db.QueryRowContext(ctx, save, arg.Title, arg.Status)
+	row := q.db.QueryRowContext(ctx, save,
+		arg.Title,
+		arg.Status,
+		arg.CreatedAt,
+		arg.UpdatedAt,
+	)
 	var i Todo
 	err := row.Scan(
 		&i.ID,

@@ -5,13 +5,13 @@
 package database
 
 import (
-	"database/sql"
+	"time"
 )
 
 type Todo struct {
 	ID        int32
 	Title     string
 	Status    string
-	CreatedAt sql.NullTime
-	UpdatedAt sql.NullTime
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }

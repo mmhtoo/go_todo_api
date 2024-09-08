@@ -1,15 +1,24 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
+	"log"
 	"net/http"
-	"os"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
 	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
+	"github.com/mmhtoo/go-todo-api/handlers/todo"
 	"github.com/mmhtoo/go-todo-api/helpers"
+	"github.com/mmhtoo/go-todo-api/internal/database"
+	"github.com/mmhtoo/go-todo-api/types"
 )
+
+type apiConfig struct {
+	DB *database.Queries
+}
 
 func main() {
 	// load env file
@@ -20,11 +29,24 @@ func main() {
 	configCors(router)
 
 	// get port from env
-	port := loadPortFromEnv()
+	port, _ := helpers.LoadFromEnv("PORT", false, "3000")
+	// get db url from env
+	dbURL, _ := helpers.LoadFromEnv("DB_URL", true, "")
+	// open db connection
+	dbConn, dbConnError := sql.Open("postgres", dbURL)
+	if dbConnError != nil {
+		log.Fatal("Failed to open database connnection at ", dbURL, "\n ", dbConnError)
+	}
+	// make queries instance
+	queries := database.New(dbConn)
+	apiConfig := types.ApiConfig{
+		DB: queries,
+	}
 
 	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		helpers.NewDataResponse(w, 200, "Success", struct{}{})
 	})
+	router.Post("/todos", todo.HandleCreateTodo(&apiConfig))
 
 	server := &http.Server{
 		Handler: router,
@@ -38,14 +60,6 @@ func main() {
 		fmt.Printf("Error: %s", serverError)
 	}
 
-}
-
-func loadPortFromEnv() string {
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "9000"
-	}
-	return port
 }
 
 func configCors(router *chi.Mux) {

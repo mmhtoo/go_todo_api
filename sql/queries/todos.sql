@@ -1,6 +1,6 @@
 -- name: Save :one
-INSERT INTO todos (title, status)
-VALUES ($1, $2)
+INSERT INTO todos (title, status, created_at, updated_at)
+VALUES ($1, $2, $3, $4)
 RETURNING *;
 
 -- name: FindById :one
